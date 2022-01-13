@@ -31,6 +31,9 @@ class _MyHomePageState extends State<MyHomePage> {
     Product(0, "Milk", 1, 1.5),
     Product(1, "Biscuits", 2, 2)
   ];
+  TextEditingController _productNameController = TextEditingController();
+  TextEditingController _productQuantityController = TextEditingController();
+  TextEditingController _productPriceController = TextEditingController();
   double total = 0;
   double calculateTotal() {
     total = 0;
@@ -51,6 +54,115 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text("Cart Calculator"),
+        ),
+        floatingActionButton: Padding(
+          padding: const EdgeInsets.only(bottom: 32.0),
+          child: FloatingActionButton(
+            onPressed: () async {
+              await showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      actionsAlignment: MainAxisAlignment.center,
+                      actions: [
+                        ElevatedButton(
+                            onPressed: () {
+                              //if any of the fields are empty we abort the process of new product addition
+                              if (!(_productNameController.text.isEmpty ||
+                                  _productQuantityController.text.isEmpty ||
+                                  _productPriceController.text.isEmpty)) {
+                                if (_productNameController.text.length <= 30 &&
+                                    int.parse(_productQuantityController.text) <
+                                        100 &&
+                                    double.parse(_productPriceController.text) <
+                                        1000) {
+                                  Product newProduct = Product(
+                                      productsList.length,
+                                      _productNameController.text,
+                                      int.parse(
+                                          _productQuantityController.text),
+                                      double.parse(
+                                          _productPriceController.text));
+                                  setState(() {
+                                    productsList.add(newProduct);
+                                  });
+                                } else {
+                                  print("Values out of range");
+                                }
+                              } else {
+                                print("Empty values not allowed");
+                              }
+
+                              for (int i = 0; i < productsList.length; i++) {
+                                print(
+                                    "${productsList[i].id} ${productsList[i].name}");
+                              }
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("ADD"))
+                      ],
+                      elevation: 6,
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Add a new product'),
+                          IconButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              icon: const Icon(Icons.close))
+                        ],
+                      ),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: TextField(
+                              onChanged: (value) {},
+                              controller: _productNameController,
+                              keyboardType: TextInputType.text,
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.black)),
+                                  hintText: "Product name"),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: TextField(
+                              onChanged: (value) {},
+                              controller: _productQuantityController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.black)),
+                                  hintText: "Product quantity"),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: TextField(
+                              onChanged: (value) {},
+                              controller: _productPriceController,
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                  border: OutlineInputBorder(
+                                      borderSide:
+                                          BorderSide(color: Colors.black)),
+                                  hintText: "Product price"),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  });
+            },
+            child: const Icon(Icons.add),
+          ),
         ),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

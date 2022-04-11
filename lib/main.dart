@@ -1,5 +1,6 @@
 import 'package:cart_calculator/product_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -72,24 +73,18 @@ class _MyHomePageState extends State<MyHomePage> {
                               if (!(_productNameController.text.isEmpty ||
                                   _productQuantityController.text.isEmpty ||
                                   _productPriceController.text.isEmpty)) {
-                                if (_productNameController.text.length <= 30 &&
-                                    int.parse(_productQuantityController.text) <
-                                        100 &&
-                                    double.parse(_productPriceController.text) <
-                                        1000) {
-                                  Product newProduct = Product(
-                                      productsList.length,
-                                      _productNameController.text,
-                                      int.parse(
-                                          _productQuantityController.text),
-                                      double.parse(
-                                          _productPriceController.text));
-                                  setState(() {
-                                    productsList.add(newProduct);
-                                  });
-                                } else {
-                                  print("Values out of range");
-                                }
+                                Product newProduct = Product(
+                                    productsList.length,
+                                    _productNameController.text,
+                                    int.parse(_productQuantityController.text),
+                                    double.parse(_productPriceController.text));
+                                setState(() {
+                                  _productNameController.clear();
+                                  _productQuantityController.clear();
+                                  _productPriceController.clear();
+                                  productsList.add(newProduct);
+                                  calculateTotal();
+                                });
                               } else {
                                 print("Empty values not allowed");
                               }
@@ -122,8 +117,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: TextField(
                               onChanged: (value) {},
                               controller: _productNameController,
+                              maxLength: 30,
                               keyboardType: TextInputType.text,
                               decoration: const InputDecoration(
+                                  counterText: "",
                                   border: OutlineInputBorder(
                                       borderSide:
                                           BorderSide(color: Colors.black)),
@@ -136,7 +133,12 @@ class _MyHomePageState extends State<MyHomePage> {
                               onChanged: (value) {},
                               controller: _productQuantityController,
                               keyboardType: TextInputType.number,
+                              maxLength: 2,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
                               decoration: const InputDecoration(
+                                  counterText: "",
                                   border: OutlineInputBorder(
                                       borderSide:
                                           BorderSide(color: Colors.black)),
@@ -146,9 +148,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
                             child: TextField(
-                              onChanged: (value) {},
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  if (double.parse(value) < 999.99) {
+                                    print(value);
+                                  } else {
+                                    _productPriceController.clear();
+                                  }
+                                }
+                              },
                               controller: _productPriceController,
                               keyboardType: TextInputType.number,
+                              maxLength: 6,
                               decoration: const InputDecoration(
                                   border: OutlineInputBorder(
                                       borderSide:
